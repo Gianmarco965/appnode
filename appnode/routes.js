@@ -74,6 +74,11 @@ function http()
             db.seleccionarcategoriaxstock(respuesta);
         })
 
+        app.get('/categoria/reportemes/',function(solicitud,respuesta){
+            db.cantidaddeudaxmes(respuesta);
+        })
+        
+
         app.post('/categoria/',function(solicitud,respuesta)
         {
             db.agregarcategoria(solicitud.body,respuesta);
@@ -180,6 +185,7 @@ function http()
             db.pagarcuota(solicitud.body,respuesta);
         })
 
+      
     }
 }
 

@@ -921,6 +921,32 @@ console.log(datos);
 
     }
 
+    this.cantidaddeudaxmes=function(respuesta)
+    {
+        let cadena;
+        conexion.obtener(function(er,cn)
+        {
+                cn.query("select MonthName(fecha) as mes, count(*) as cantidad from deuda where fecha >= makedate(year(curdate()), 1) and fecha < makedate(year(curdate()) + 1, 1) group by MonthName(fecha)",function(error,resultado){
+                        cn.release();
+                        if (error)
+                                {
+                                        respuesta.send({estado:'Error'});
+                                }
+                        else
+                                {
+                                        respuesta.send(resultado);
+                                }
+
+
+
+                })
+        })
+
+
+    }
+
+
+
 
 }
 module.exports=new MetodosDB();
