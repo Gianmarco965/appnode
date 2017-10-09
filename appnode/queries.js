@@ -192,7 +192,7 @@ this.seleccionarcategoriaxstock=function(respuesta)
 
                                          conexion.obtener(function(er,cn){
 
-                cn.query("insert into deuda values (?,?,?,?,?,?,?,?,?,?,?)",[datos.iddeuda,datos.fecha,datos.nombre,datos.apellido,datos.direccion,datos.telefono,datos.correo,datos.documento,datos.idusuario,datos.idestado,datos.idcuota],function(error,resultado){
+                cn.query("insert into deuda values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",[datos.iddeuda,datos.fecha,datos.nombre,datos.apellido,datos.departamento,datos.provincia,datos.distrito,datos.direccion,datos.telefono,datos.correo,datos.documento,datos.idusuario,datos.idestado,datos.idcuota],function(error,resultado){
 
                         cn.release();
                         if (error)
