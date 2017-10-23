@@ -43,6 +43,29 @@ this.seleccionarcategoria=function(respuesta)
                 });
         })
     }
+    this.seleccionarpedidosxcliente=function(respuesta)
+    {
+        conexion.obtener(function(er,cn)
+        {
+                cn.query("SELECT c.idusuario,c.nombre,c.apellido,c.empresa,COUNT(d.idusuario) as 'pedidos' FROM `cliente` c inner join usuarios s on s.idusuario=c.idusuario inner join deuda d on d.idusuario=s.idusuario group by d.idusuario ASC",function(error,resultado){
+
+                            cn.release();
+                            if (error)
+                            {
+                                respuesta.send({estado:'Error'});
+
+                            }
+                            else
+                            {
+                                respuesta.send(resultado);
+                            }
+                });
+        })
+    }
+
+
+    
+
 this.seleccionarcategoriaxstock=function(respuesta)
 {
         conexion.obtener(function(er,cn)
@@ -61,6 +84,29 @@ this.seleccionarcategoriaxstock=function(respuesta)
         })
 
 }
+
+this.seleccionarcategoriaxstock=function(respuesta)
+{
+        conexion.obtener(function(er,cn)
+        {
+                cn.query("SELECT p.idproducto,p.nombre,COUNT(d.idproducto) as 'numero',c.nombre as 'categoria'  FROM deseo d inner join producto p on p.idproducto=d.idproducto inner join categoria c on c.idcategoria=p.idcategoria where idestado=1 GROUP BY d.idproducto  DESC",function(error,resultado){
+                        cn.release();
+                        if (error)
+                                {
+                                        respuesta.send({estado:'Error'});
+                                }
+                                else{
+                                        respuesta.send(resultado);
+                                }
+
+                });
+        })
+
+}
+
+
+
+
 
 
 

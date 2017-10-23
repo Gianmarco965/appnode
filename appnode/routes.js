@@ -66,6 +66,18 @@ function http()
              db.seleccionardeudasales(data,respuesta);
          })
 
+        app.get('/categoria/reporteclientexdeuda',function(solicitud,respuesta){
+        
+            db.seleccionarpedidosxcliente(respuesta);
+
+        })
+
+
+        app.get('/categoria/reportedeseos',function(solicitud,respuesta)
+        {
+            db.seleccionarcategoriaxstock(respuesta);
+        })
+
          app.get('/categoria/',function(solicitud,respuesta){
 
             db.seleccionarcategoria(respuesta);
