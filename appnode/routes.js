@@ -66,16 +66,26 @@ function http()
              db.seleccionardeudasales(data,respuesta);
          })
 
+  
+
         app.get('/categoria/reporteclientexdeuda',function(solicitud,respuesta){
         
             db.seleccionarpedidosxcliente(respuesta);
 
         })
+        app.put('/categoria/actualizarVentaStock',function(solicitud,respuesta){
+            db.actualizarVentaStock(solicitud.body,respuesta);
+        })
 
-
-        app.get('/categoria/reportedeseos',function(solicitud,respuesta)
+        app.get('/categoria/reportedeseos/',function(solicitud,respuesta)
         {
-            db.seleccionarcategoriaxstock(respuesta);
+            console.log(solicitud);
+            db.seleccionareportedeseo(respuesta);
+        })
+
+        app.get('/categoria/detallereportedeseos/',function(solicitud,respuesta){
+
+            db.detallereportedeseo(respuesta);
         })
 
          app.get('/categoria/',function(solicitud,respuesta){
@@ -90,6 +100,16 @@ function http()
             db.cantidaddeudaxmes(respuesta);
         })
         
+        app.put('/categoria/stock',function(solicitud,respuesta){
+            db.actualizarstock(solicitud.body,respuesta);
+
+        })
+
+        app.get('/categoria/cantidadpedidos/',function(solicitud,respuesta){
+
+            db.cantidadpedidos(respuesta);
+        })
+
 
         app.post('/categoria/',function(solicitud,respuesta)
         {
@@ -114,6 +134,9 @@ function http()
         app.put('/inventario/',function(solicitud,respuesta)
         {
             db.actualizar(solicitud.body,respuesta);
+        })
+        app.put('/inventario/actualizar/',function(solicitud,respuesta){
+            db.actualizarProducto(solicitud.body,respuesta);
         })
 
         app.post('/deseo/',function(solicitud,respuesta){

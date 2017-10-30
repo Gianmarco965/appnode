@@ -47,7 +47,7 @@ this.seleccionarcategoria=function(respuesta)
     {
         conexion.obtener(function(er,cn)
         {
-                cn.query("SELECT c.idusuario,c.nombre,c.apellido,c.empresa,COUNT(d.idusuario) as 'pedidos' FROM `cliente` c inner join usuarios s on s.idusuario=c.idusuario inner join deuda d on d.idusuario=s.idusuario group by d.idusuario ASC",function(error,resultado){
+                cn.query("SELECT c.idusuario,c.nombre,c.apellido,c.empresa,COUNT(d.idusuario) as 'pedidos' FROM `cliente` c inner join usuarios s on s.idusuario=c.idusuario inner join deuda d on d.idusuario=s.idusuario where d.idestado=1 group by d.idusuario ASC",function(error,resultado){
 
                             cn.release();
                             if (error)
@@ -64,6 +64,28 @@ this.seleccionarcategoria=function(respuesta)
     }
 
 
+    this.actualizarVentaStock=function(datos,respuesta)
+    {
+                conexion.obtener(function(er,cn){
+
+
+                        cn.query("update producto set stock=stock - "+datos.cantidad+" where idproducto=?",datos.idproducto,function(error,resultado){
+
+                                cn.release();
+                                if (error)
+                                        {
+                                                respuesta.send({estado:'Estado'});
+                                        }
+                                        else
+                                        {
+                                                respuesta.send(resultado);
+                                        }
+
+                        })
+
+                })
+
+    }
     
 
 this.seleccionarcategoriaxstock=function(respuesta)
@@ -85,11 +107,46 @@ this.seleccionarcategoriaxstock=function(respuesta)
 
 }
 
-this.seleccionarcategoriaxstock=function(respuesta)
+this.actualizarstock=function(datos,respuesta)
+{
+        conexion.obtener(function(er,cn){
+                cn.query("update producto set stock=? where idproducto=?",[datos.cantidad,datos.idproducto],function(error,resultado){
+
+                        cn.release();
+                        if (error)
+                                {
+
+                                        respuesta.send({estado:'Error'});
+                                }
+                                else 
+                                {
+
+
+                                        respuesta.send(resultado);
+                                }
+
+                });
+
+
+
+        })
+
+
+
+}
+
+
+
+
+
+
+
+this.seleccionareportedeseo=function(respuesta)
 {
         conexion.obtener(function(er,cn)
         {
-                cn.query("SELECT p.idproducto,p.nombre,COUNT(d.idproducto) as 'numero',c.nombre as 'categoria'  FROM deseo d inner join producto p on p.idproducto=d.idproducto inner join categoria c on c.idcategoria=p.idcategoria where idestado=1 GROUP BY d.idproducto  DESC",function(error,resultado){
+                cn.query("SELECT p.idproducto,p.nombre,COUNT(d.idproducto) as 'numero',c.nombre as 'categoria'  FROM deseo d inner join producto p on p.idproducto=d.idproducto inner join categoria c on c.idcategoria=p.idcategoria where idestado=1 GROUP BY d.idproducto ORDER by numero  DESC",function(error,resultado){
+                        console.log(respuesta);
                         cn.release();
                         if (error)
                                 {
@@ -105,7 +162,29 @@ this.seleccionarcategoriaxstock=function(respuesta)
 }
 
 
+this.detallereportedeseo=function(respuesta)
+{
+                conexion.obtener(function(er,cn)
+                {
+                        cn.query("SELECT p.idproducto,p.nombre,c.nombre as 'categoria',concat(l.nombre ,' ',l.apellido) as 'nombres',d.fecha FROM deseo d inner join producto p on p.idproducto=d.idproducto inner join categoria c on c.idcategoria=p.idcategoria inner join cliente l on l.idusuario=d.idusuario where d.idestado=1",function(error,resultado){
+                                        cn.release();
+                                                if (error)
+                                                        {
+                                                                respuesta.send({estado:'Error'});
+                                                        }
+                                                else
+                                                        {
+                                                                respuesta.send(resultado);
 
+                                                        }
+
+
+                        })
+
+                })
+
+
+}
 
 
 
@@ -322,7 +401,15 @@ this.seleccionarcategoriaxstock=function(respuesta)
                                 }
                         else
                         {
-                                        respuesta.send(resultado);
+                                        let fechaevento;
+                                       
+                                        resultado.forEach( (resultado) => { 
+                                                fechaevento=(`${resultado.fechaevento}`); 
+                                                 console.log(fechaevento);
+                                                 });        
+                                                 
+                                                 respuesta.send(resultado);
+                                                 
 
                                 }
 
@@ -681,6 +768,28 @@ this.seleccionarcategoriaxstock=function(respuesta)
 
     }
 
+this.actualizarProducto=function(datos,respuesta)
+{
+        conexion.obtener(function(er,cn){
+                console.log(datos);
+                cn.query('update producto set nombre=?,descripcion=?,oferta=?,precio=? where idproducto=?',[datos.nombre,datos.descripcion,datos.oferta,datos.precio,datos.idproducto],function(error,resultado){
+                               
+                        cn.release();
+                        if (error)
+                                {
+                                        respuesta.send({ estado:'Error' });   
+
+                                }
+                                else
+                                        {
+                                                respuesta.send({estado: 'OK' });       
+                                        }
+
+                })
+
+        })
+
+}
 
 this.actualizarDeseo=function(datos,respuesta)
     {
@@ -745,7 +854,7 @@ this.actualizarDeseo=function(datos,respuesta)
                 }
                 else if (datos.campo=="c.nombre")
                 {
-                         cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where c.nombre=? and idrol=1 and idestado=3";
+                         cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where c.nombre like '"+datos.valor+"%' and idrol=1 and idestado=3";
                 }
                 else if (datos.campo=="c.idcliente")
                 {
@@ -755,20 +864,9 @@ this.actualizarDeseo=function(datos,respuesta)
                 {
                         if (datos.valor=="CURDATE()")
                         {
-                                 cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where DATE(c.fechasistema)=CURDATE() and idrol=1 and idestado=3";
+                                 cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where idrol=1 and idestado=3";
                         }
-                        else if (datos.valor=="ayer")
-                        {
-                                cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where DATE(c.fechasistema)=DATE_SUB(CURDATE(), INTERVAL 1 DAY) and idrol=1 and idestado=3";        
-                        }
-                        else if (datos.valor=="semana")
-                        {
-                                cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where YEARWEEK(c.fechasistema)=YEARWEEK(CURDATE()) and idrol=1 and idestado=3";        
-                        }
-                        else if (datos.valor=="semana_anterior")
-                        {
-                                cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,c.empresa,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where YEARWEEK(c.fechasistema)=YEARWEEK(CURDATE()- INTERVAL 7 DAY) and idrol=1 and idestado=3"
-                        }
+                       
                 
                 }
                 
@@ -891,37 +989,26 @@ this.actualizarDeseo=function(datos,respuesta)
                 
                 if (datos.campo=="u.usuario")
                 {
-                        cadena="SELECT d.iddeuda,d.fecha,c.nombre,c.apellido,d.direccion,c.celular,u.usuario,c.email,d.idusuario,c.idestado as 'clienteestado',d.idestado,c.idcliente,COUNT(c.idcliente) as 'pedido',t.cantcuota FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join usuarios u on u.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE u.usuario=? and c.idestado=3 and d.idestado=1 GROUP BY c.idcliente ORDER by d.fecha desc";
+                        cadena="SELECT d.iddeuda,d.fecha,c.nombre,c.apellido,d.direccion,c.celular,u.usuario,c.email,d.idusuario,c.idestado as 'clienteestado',d.idestado,c.idcliente,COUNT(c.idcliente) as 'pedido',t.cantcuota,d.departamento,d.provincia,d.distrito,d.direccion,c.celular FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join usuarios u on u.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE u.usuario=? and c.idestado=3 and d.idestado=1 GROUP BY c.idcliente ORDER by d.fecha desc";
                 }
                 else if (datos.campo=="c.nombre")
                 {
-                        cadena="SELECT d.iddeuda,d.fecha,c.nombre,c.apellido,d.direccion,c.celular,u.usuario,c.email,d.idusuario,c.idestado as 'clienteestado',d.idestado,c.idcliente,COUNT(c.idcliente) as 'pedido',t.cantcuota FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join usuarios u on u.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota  WHERE c.nombre like '%"+datos.valor +"%' and c.idestado=3 and d.idestado=1 GROUP BY c.idcliente ORDER by d.fecha desc";
+                        cadena="SELECT d.iddeuda,d.fecha,c.nombre,c.apellido,d.direccion,c.celular,u.usuario,c.email,d.idusuario,c.idestado as 'clienteestado',d.idestado,c.idcliente,COUNT(c.idcliente) as 'pedido',t.cantcuota,d.departamento,d.provincia,d.distrito,d.direccion,c.celular FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join usuarios u on u.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota  WHERE c.nombre like '%"+datos.valor +"%' and c.idestado=3 and d.idestado=1 GROUP BY c.idcliente ORDER by d.fecha desc";
                 }
                 else if (datos.campo=="c.idcliente")
                 {
-                        cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where c.idcliente=? and idrol=1 and idestado=3";
+                        cadena="select c.idcliente,c.nombre,c.apellido,c.email,c.celular,c.genero,u.usuario,u.pass,c.idestado,u.idusuario from cliente c inner join usuarios u on u.idusuario=c.idusuario where c.idcliente=? and idrol=1 and c.idestado=3 and d.idestado=1";
                 }
                 else if (datos.campo=="fechasistema")
                 {
                         if (datos.valor=="CURDATE()")
                         {
-                                 cadena="SELECT d.iddeuda,d.fecha,d.nombre,d.apellido,d.direccion,d.telefono,d.correo,d.documento,d.idusuario,d.idestado,c.idcliente,t.cantcuota FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE DATE(d.fecha) = CURDATE() ORDER by d.fecha desc";
-                        }
-                        else if (datos.valor=="ayer")
-                        {
-                                cadena="SELECT d.iddeuda,d.fecha,d.nombre,d.apellido,d.direccion,d.telefono,d.correo,d.documento,d.idusuario,d.idestado,c.idcliente,t.cantcuota FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE DATE(d.fecha) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER by d.fecha desc";      
-                        }
-                        else if (datos.valor=="semana")
-                        {
-                                cadena="SELECT d.iddeuda,d.fecha,d.nombre,d.apellido,d.direccion,d.telefono,d.correo,d.documento,d.idusuario,d.idestado,c.idcliente,t.cantcuota FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE YEARWEEK(d.fecha) = YEARWEEK(CURDATE()) ORDER by d.fecha desc";
-                                      
-                        }
-                        else if (datos.valor=="semana_anterior")
-                        {
-                                cadena="SELECT d.iddeuda,d.fecha,d.nombre,d.apellido,d.direccion,d.telefono,d.correo,d.documento,d.idusuario,d.idestado,c.idcliente,t.cantcuota FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE YEARWEEK(d.fecha) = YEARWEEK(CURDATE()- INTERVAL 7 DAY) ORDER by d.fecha desc";
-
-                        }
-                
+                                 cadena="SELECT d.iddeuda,d.fecha,c.nombre,c.apellido,d.direccion,d.telefono,d.correo,d.documento,d.idusuario,d.idestado,c.idcliente,t.cantcuota,d.departamento,d.provincia,d.distrito,d.direccion,c.celular FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE d.idestado=1 and c.idestado=3 ORDER by d.fecha desc";
+                        }       
+                        else if (datos.valor=="cancelados")
+                                {
+                                        cadena="SELECT d.iddeuda,d.fecha,c.nombre,c.apellido,d.direccion,d.telefono,d.correo,d.documento,d.idusuario,d.idestado,c.idcliente,t.cantcuota,d.departamento,d.provincia,d.distrito,d.direccion,c.celular FROM deuda d inner join cliente c on d.idusuario=c.idusuario inner join cuota t on t.idcuota=d.idcuota WHERE d.idestado=2 and c.idestado=3 ORDER by d.fecha desc"
+                                }
                 }
 
                         cn.query(cadena,datos.valor,function(error,resultado)
@@ -958,7 +1045,7 @@ console.log(datos);
                                 }
                         else
                                 {
-                                   respuesta.send(resultado);
+                                   respuesta.send(datos.fechaevento);
                                 }
 
 
@@ -988,6 +1075,26 @@ console.log(datos);
                 })
         })
 
+
+    }
+
+    this.cantidadpedidos=function(respuesta)
+    {
+        conexion.obtener(function(er,cn){
+                cn.query("SELECT SUM(IF(idestado=1,1,0)) as 'deudas', SUM(IF(idestado=2,1,0)) as 'canceladas' FROM `deuda`",function(error,resultado){
+
+                        cn.release();
+                        if(error)
+                                {
+                                        respuesta.send({estado:'Error'});
+                                } 
+                                else
+                                {
+                                        respuesta.send(resultado);
+                                }
+                })
+
+        })
 
     }
 
